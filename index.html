@@ -2,25 +2,104 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>英単語テスト</title>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: auto; }
-    .hidden { display: none; }
-    button { margin: 5px 0; width: 100%; }
+    /* 基本的なスタイル */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
+
+    /* 入力とボタン */
+    label, input, button {
+      font-size: 1.2em;
+      margin: 10px 0;
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+    }
+
+    input, button {
+      border: none;
+      background-color: #fff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    /* テスト画面 */
+    .hidden {
+      display: none;
+    }
+
+    .question-box {
+      font-size: 1.5em;
+      margin: 20px 0;
+    }
+
+    .result-section {
+      margin-top: 20px;
+    }
+
+    /* モバイル用のレスポンシブデザイン */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2em;
+      }
+      .question-box {
+        font-size: 1.2em;
+      }
+      button {
+        padding: 12px;
+        font-size: 1.5em;
+      }
+      label, input {
+        font-size: 1em;
+      }
+    }
   </style>
 </head>
 <body>
+
   <h1>英単語テスト</h1>
 
-  <label>テスト番号（0 ～ 自動計算）:</label>
+  <label for="testNumber">テスト番号（0 ～ 最大テスト数）:</label>
   <input type="number" id="testNumber" min="0" value="0">
 
   <button onclick="loadWords()">テスト開始</button>
 
   <div id="testSection" class="hidden">
-    <p id="questionCount"></p>
-    <p id="wordPrompt"></p>
-    <button onclick="showAnswer()">答えを表示</button>
+    <div class="question-box">
+      <p id="questionCount"></p>
+      <p id="wordPrompt"></p>
+      <button onclick="showAnswer()">答えを表示</button>
+    </div>
 
     <div id="answerSection" class="hidden">
       <p id="correctAnswer"></p>
@@ -28,7 +107,7 @@
       <button onclick="markCorrect(false)">不正解</button>
     </div>
 
-    <div id="resultSection" class="hidden">
+    <div id="resultSection" class="hidden result-section">
       <h3>未習得単語一覧</h3>
       <ul id="missedWords"></ul>
       <button onclick="nextRound()">次のラウンドへ</button>
