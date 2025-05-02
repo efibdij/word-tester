@@ -1,85 +1,72 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>英単語テスト</title>
   <style>
-    /* 基本的なスタイル */
     body {
       font-family: 'Arial', sans-serif;
-      background-color: #f4f4f9;
+      background-color: #f9f9fb;
       margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
+      padding: 20px;
       text-align: center;
     }
 
     h1 {
-      font-size: 2.5em;
       color: #4CAF50;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
-    /* 入力とボタン */
-    label, input, button {
-      font-size: 1.2em;
-      margin: 10px 0;
-      padding: 10px;
-      width: 80%;
-      max-width: 400px;
-      border-radius: 8px;
-      border: 2px solid #ddd;
+    .hidden {
+      display: none;
     }
 
     input, button {
+      font-size: 1.2em;
+      padding: 10px;
+      margin: 10px 0;
+      width: 80%;
+      max-width: 400px;
       border: none;
-      background-color: #fff;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    input {
+      border: 2px solid #ccc;
     }
 
     button {
       background-color: #4CAF50;
       color: white;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
       background-color: #45a049;
     }
 
-    /* テスト画面 */
-    .hidden {
-      display: none;
-    }
-
-    .question-box {
-      font-size: 1.5em;
-      margin: 20px 0;
-    }
-
-    .result-section {
+    .section {
       margin-top: 20px;
     }
 
-    /* モバイル用のレスポンシブデザイン */
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      font-size: 1.1em;
+      margin: 5px 0;
+    }
+
     @media (max-width: 600px) {
       h1 {
-        font-size: 2em;
+        font-size: 1.8em;
       }
-      .question-box {
-        font-size: 1.2em;
-      }
-      button {
-        padding: 12px;
-        font-size: 1.5em;
-      }
-      label, input {
+      input, button {
         font-size: 1em;
       }
     }
@@ -89,29 +76,32 @@
 
   <h1>英単語テスト</h1>
 
-  <label for="testNumber">テスト番号（0 ～ 最大テスト数）:</label>
-  <input type="number" id="testNumber" min="0" value="0">
+  <!-- 初期入力 -->
+  <div id="setupSection" class="section">
+    <label for="testNumber">テスト番号（0 ～ 最大）:</label><br />
+    <input type="number" id="testNumber" min="0" value="0" /><br />
+    <button onclick="loadWords()">テスト開始</button>
+  </div>
 
-  <button onclick="loadWords()">テスト開始</button>
+  <!-- 問題画面 -->
+  <div id="questionSection" class="section hidden">
+    <p id="questionCount"></p>
+    <p id="wordPrompt" style="font-size:1.5em;"></p>
+    <button onclick="showAnswer()">答えを表示</button>
+  </div>
 
-  <div id="testSection" class="hidden">
-    <div class="question-box">
-      <p id="questionCount"></p>
-      <p id="wordPrompt"></p>
-      <button onclick="showAnswer()">答えを表示</button>
-    </div>
+  <!-- 答え表示 -->
+  <div id="answerSection" class="section hidden">
+    <p id="correctAnswer" style="font-size:1.3em;"></p>
+    <button onclick="markCorrect(true)">正解</button>
+    <button onclick="markCorrect(false)">不正解</button>
+  </div>
 
-    <div id="answerSection" class="hidden">
-      <p id="correctAnswer"></p>
-      <button onclick="markCorrect(true)">正解</button>
-      <button onclick="markCorrect(false)">不正解</button>
-    </div>
-
-    <div id="resultSection" class="hidden result-section">
-      <h3>未習得単語一覧</h3>
-      <ul id="missedWords"></ul>
-      <button onclick="nextRound()">次のラウンドへ</button>
-    </div>
+  <!-- 結果画面 -->
+  <div id="resultSection" class="section hidden">
+    <h3>未習得単語一覧</h3>
+    <ul id="missedWords"></ul>
+    <button onclick="nextRound()">次のラウンドへ</button>
   </div>
 
   <script>
@@ -121,13 +111,21 @@
     let testIndex = 0;
     let testRound = 1;
 
+    function showSection(sectionId) {
+      const sections = ['setupSection', 'questionSection', 'answerSection', 'resultSection'];
+      sections.forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(sectionId).classList.remove('hidden');
+    }
+
     async function loadWords() {
       try {
         const res = await fetch('words.txt');
         const text = await res.text();
         const lines = text.trim().split('\n');
         allWords = lines.map(line => line.trim().split(/\s+/)).filter(p => p.length === 2);
-        
+
         const testNum = parseInt(document.getElementById('testNumber').value);
         const maxTestNum = Math.floor(allWords.length / 10);
         if (testNum < 0 || testNum > maxTestNum) {
@@ -140,24 +138,23 @@
         testIndex = 0;
         testRound = 1;
         missed = [];
-        document.getElementById('testSection').classList.remove('hidden');
+        showSection('questionSection');
         showQuestion();
       } catch (e) {
-        alert("words.txt の読み込みに失敗しました。サーバー上に正しく配置されていますか？");
+        alert("words.txt の読み込みに失敗しました。サーバーに正しく配置されていますか？");
       }
     }
 
     function showQuestion() {
       document.getElementById('questionCount').textContent = `テスト${testRound}回目 問${testIndex + 1}/${currentWords.length}`;
       document.getElementById('wordPrompt').textContent = `英単語: ${currentWords[testIndex][0]}`;
-      document.getElementById('answerSection').classList.add('hidden');
-      document.getElementById('resultSection').classList.add('hidden');
+      showSection('questionSection');
     }
 
     function showAnswer() {
       const correct = currentWords[testIndex][1];
       document.getElementById('correctAnswer').textContent = `正解: ${correct}`;
-      document.getElementById('answerSection').classList.remove('hidden');
+      showSection('answerSection');
     }
 
     function markCorrect(isCorrect) {
@@ -180,13 +177,13 @@
         li.textContent = `${eng}: ${jp}`;
         ul.appendChild(li);
       });
-      document.getElementById('resultSection').classList.remove('hidden');
+      showSection('resultSection');
     }
 
     function nextRound() {
       if (missed.length === 0) {
         alert("すべての単語を習得しました！");
-        document.getElementById('testSection').classList.add('hidden');
+        showSection('setupSection');
         return;
       }
       currentWords = [...missed];
@@ -204,5 +201,6 @@
       }
     }
   </script>
+
 </body>
 </html>
