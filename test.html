@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>単語テスト</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; }
+    .hidden { display: none; }
+    input, button { margin: 5px 0; width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>英単語テスト</h1>
+
+  <label>テスト番号（0 ～ 自動算出）:</label>
+  <input type="number" id="testNumber" min="0" value="0">
+
+  <button onclick="loadWords()">テスト開始</button>
+
+  <div id="testSection" class="hidden">
+    <p id="questionCount"></p>
+    <p id="wordPrompt"></p>
+    <input type="password" id="userInput" placeholder="日本語訳を入力">
+    <button onclick="showAnswer()">答えを表示</button>
+    <div id="answerSection" class="hidden">
+      <p id="correctAnswer"></p>
+      <button onclick="markCorrect(true)">正解</button>
+      <button onclick="markCorrect(false)">不正解</button>
+    </div>
+    <div id="resultSection" class="hidden">
+      <h3>未習得単語一覧</h3>
+      <ul id="missedWords"></ul>
+      <button onclick="nextRound()">次のラウンドへ</button>
+    </div>
+  </div>
+
+  <script>
+    let allWords = [];
+    let currentWords = [];
+    let missed = [];
+    let testIndex = 0;
+    let testRound = 1;
+
+    async function loadWords() {
+      try {
+        const res = await fetch('words.txt');
+        const text = await res.text();
+        const lines = text.trim().split('\n');
+        allWords = lines.map(line => line.trim().split(/\s+/)).filter(p => p.length === 2);
+        
+        const testNum = parseInt(document.getElementById('testNumber').value);
+        const maxTestNum = Math.floor(allWords.length / 10);
+        if (testNum < 0 || testNum > maxTestNum) {
+          alert(`テスト番号は 0 ～ ${maxTestNum} にしてください`);
+          return;
+        }
+
+        currentWords = allWords.slice(testNum * 10, (testNum + 1) * 10);
+        shuffle(currentWords);
+        testIndex = 0;
+        testRound = 1;
+        missed = [];
+        document.getElementById('testSection').classList.remove('hidden');
+        showQuestion();
+      } catch (e) {
+        alert("words.txt の読み込みに失敗しました。サーバー上に正しく配置されていますか？");
+      }
+    }
+
+    function showQuestion() {
+      document.getElementById('questionCount').textContent = `テスト${testRound}回目 問${testIndex + 1}/${currentWords.length}`;
+      document.getElementById('wordPrompt').textContent = `英単語: ${currentWords[testIndex][0]}`;
+      document.getElementById('userInput').value = '';
+      document.getElementById('answerSection').classList.add('hidden');
+      document.getElementById('resultSection').classList.add('hidden');
+    }
+
+    function showAnswer() {
+      const correct = currentWords[testIndex][1];
+      document.getElementById('correctAnswer').textContent = `正解: ${correct}`;
+      document.getElementById('answerSection').classList.remove('hidden');
+    }
+
+    function markCorrect(isCorrect) {
+      if (!isCorrect) {
+        missed.push(currentWords[testIndex]);
+      }
+      testIndex++;
+      if (testIndex >= currentWords.length) {
+        showResult();
+      } else {
+        showQuestion();
+      }
+    }
+
+    function showResult() {
+      const ul = document.getElementById('missedWords');
+      ul.innerHTML = '';
+      missed.forEach(([eng, jp]) => {
+        const li = document.createElement('li');
+        li.textContent = `${eng}: ${jp}`;
+        ul.appendChild(li);
+      });
+      document.getElementById('resultSection').classList.remove('hidden');
+    }
+
+    function nextRound() {
+      if (missed.length === 0) {
+        alert("すべての単語を習得しました！");
+        document.getElementById('testSection').classList.add('hidden');
+        return;
+      }
+      currentWords = [...missed];
+      shuffle(currentWords);
+      missed = [];
+      testIndex = 0;
+      testRound++;
+      showQuestion();
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+  </script>
+</body>
+</html>
+
