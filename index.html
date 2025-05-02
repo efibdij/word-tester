@@ -2,17 +2,17 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>単語テスト</title>
+  <title>英単語テスト</title>
   <style>
     body { font-family: sans-serif; max-width: 600px; margin: auto; }
     .hidden { display: none; }
-    input, button { margin: 5px 0; width: 100%; }
+    button { margin: 5px 0; width: 100%; }
   </style>
 </head>
 <body>
   <h1>英単語テスト</h1>
 
-  <label>テスト番号（0 ～ 自動算出）:</label>
+  <label>テスト番号（0 ～ 自動計算）:</label>
   <input type="number" id="testNumber" min="0" value="0">
 
   <button onclick="loadWords()">テスト開始</button>
@@ -20,13 +20,14 @@
   <div id="testSection" class="hidden">
     <p id="questionCount"></p>
     <p id="wordPrompt"></p>
-    <input type="password" id="userInput" placeholder="日本語訳を入力">
     <button onclick="showAnswer()">答えを表示</button>
+
     <div id="answerSection" class="hidden">
       <p id="correctAnswer"></p>
       <button onclick="markCorrect(true)">正解</button>
       <button onclick="markCorrect(false)">不正解</button>
     </div>
+
     <div id="resultSection" class="hidden">
       <h3>未習得単語一覧</h3>
       <ul id="missedWords"></ul>
@@ -70,7 +71,6 @@
     function showQuestion() {
       document.getElementById('questionCount').textContent = `テスト${testRound}回目 問${testIndex + 1}/${currentWords.length}`;
       document.getElementById('wordPrompt').textContent = `英単語: ${currentWords[testIndex][0]}`;
-      document.getElementById('userInput').value = '';
       document.getElementById('answerSection').classList.add('hidden');
       document.getElementById('resultSection').classList.add('hidden');
     }
@@ -127,4 +127,3 @@
   </script>
 </body>
 </html>
-
