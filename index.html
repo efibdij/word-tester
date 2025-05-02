@@ -74,30 +74,29 @@
 </head>
 <body>
 
-  <h1>英単語テスト</h1>
-
-  <!-- 初期入力 -->
+  <!-- 初期入力画面 -->
   <div id="setupSection" class="section">
+    <h1>英単語テスト</h1>
     <label for="testNumber">テスト番号（0 ～ 最大）:</label><br />
     <input type="number" id="testNumber" min="0" value="0" /><br />
     <button onclick="loadWords()">テスト開始</button>
   </div>
 
-  <!-- 問題画面 -->
+  <!-- 問題表示画面 -->
   <div id="questionSection" class="section hidden">
     <p id="questionCount"></p>
-    <p id="wordPrompt" style="font-size:1.5em;"></p>
+    <p id="wordPrompt" style="font-size:1.8em; font-weight: bold;"></p>
     <button onclick="showAnswer()">答えを表示</button>
   </div>
 
-  <!-- 答え表示 -->
+  <!-- 答え表示画面 -->
   <div id="answerSection" class="section hidden">
     <p id="correctAnswer" style="font-size:1.3em;"></p>
     <button onclick="markCorrect(true)">正解</button>
     <button onclick="markCorrect(false)">不正解</button>
   </div>
 
-  <!-- 結果画面 -->
+  <!-- 結果表示画面 -->
   <div id="resultSection" class="section hidden">
     <h3>未習得単語一覧</h3>
     <ul id="missedWords"></ul>
@@ -147,7 +146,7 @@
 
     function showQuestion() {
       document.getElementById('questionCount').textContent = `テスト${testRound}回目 問${testIndex + 1}/${currentWords.length}`;
-      document.getElementById('wordPrompt').textContent = `英単語: ${currentWords[testIndex][0]}`;
+      document.getElementById('wordPrompt').textContent = currentWords[testIndex][0];
       showSection('questionSection');
     }
 
