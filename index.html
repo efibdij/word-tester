@@ -62,6 +62,11 @@
       margin: 5px 0;
     }
 
+    .bold {
+      font-weight: bold;
+      font-size: 1.4em;
+    }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 1.8em;
@@ -77,7 +82,7 @@
   <!-- 初期入力画面 -->
   <div id="setupSection" class="section">
     <h1>英単語テスト</h1>
-    <label for="testNumber">テスト番号（0 ～ 最大）:</label><br />
+    <label id="testLabel" for="testNumber">テスト番号:</label><br />
     <input type="number" id="testNumber" min="0" value="0" /><br />
     <button onclick="loadWords()">テスト開始</button>
   </div>
@@ -91,7 +96,7 @@
 
   <!-- 答え表示画面 -->
   <div id="answerSection" class="section hidden">
-    <p id="correctAnswer" style="font-size:1.3em;"></p>
+    <p id="correctAnswer" class="bold"></p>
     <button onclick="markCorrect(true)">正解</button>
     <button onclick="markCorrect(false)">不正解</button>
   </div>
@@ -109,6 +114,21 @@
     let missed = [];
     let testIndex = 0;
     let testRound = 1;
+    let maxTestNum = 0;
+
+    async function init() {
+      try {
+        const res = await fetch('words.txt');
+        const text = await res.text();
+        const lines = text.trim().split('\n');
+        allWords = lines.map(line => line.trim().split(/\s+/)).filter(p => p.length === 2);
+        maxTestNum = Math.floor(allWords.length / 10);
+        document.getElementById("testNumber").max = maxTestNum;
+        document.getElementById("testLabel").textContent = `テスト番号（0 ～ ${maxTestNum}）:`;
+      } catch (e) {
+        alert("words.txt の読み込みに失敗しました。サーバーに正しく配置されていますか？");
+      }
+    }
 
     function showSection(sectionId) {
       const sections = ['setupSection', 'questionSection', 'answerSection', 'resultSection'];
@@ -119,29 +139,24 @@
     }
 
     async function loadWords() {
-      try {
-        const res = await fetch('words.txt');
-        const text = await res.text();
-        const lines = text.trim().split('\n');
-        allWords = lines.map(line => line.trim().split(/\s+/)).filter(p => p.length === 2);
-
-        const testNum = parseInt(document.getElementById('testNumber').value);
-        const maxTestNum = Math.floor(allWords.length / 10);
-        if (testNum < 0 || testNum > maxTestNum) {
-          alert(`テスト番号は 0 ～ ${maxTestNum} にしてください`);
-          return;
-        }
-
-        currentWords = allWords.slice(testNum * 10, (testNum + 1) * 10);
-        shuffle(currentWords);
-        testIndex = 0;
-        testRound = 1;
-        missed = [];
-        showSection('questionSection');
-        showQuestion();
-      } catch (e) {
-        alert("words.txt の読み込みに失敗しました。サーバーに正しく配置されていますか？");
+      if (allWords.length === 0) {
+        alert("単語が読み込まれていません");
+        return;
       }
+
+      const testNum = parseInt(document.getElementById('testNumber').value);
+      if (testNum < 0 || testNum > maxTestNum) {
+        alert(`テスト番号は 0 ～ ${maxTestNum} にしてください`);
+        return;
+      }
+
+      currentWords = allWords.slice(testNum * 10, (testNum + 1) * 10);
+      shuffle(currentWords);
+      testIndex = 0;
+      testRound = 1;
+      missed = [];
+      showSection('questionSection');
+      showQuestion();
     }
 
     function showQuestion() {
@@ -199,6 +214,8 @@
         [array[i], array[j]] = [array[j], array[i]];
       }
     }
+
+    window.onload = init;
   </script>
 
 </body>
