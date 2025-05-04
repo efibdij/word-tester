@@ -109,8 +109,8 @@
     <!-- 答え表示画面 -->
     <div id="answerSection" class="section hidden">
       <p id="correctAnswer" class="bold"></p>
-      <button onclick="markCorrect(true)">正解</button>
-      <button onclick="markCorrect(false)">不正解</button>
+      <button onclick="markCorrect(true)">知っている</button>
+      <button onclick="markCorrect(false)">知らない</button>
     </div>
 
     <!-- 結果表示画面 -->
@@ -210,8 +210,14 @@
 
     function nextRound() {
       if (missed.length === 0) {
-        alert("すべての単語を習得しました！");
-        showSection('setupSection');
+        const nextTest = parseInt(document.getElementById('testNumber').value) + 1;
+        if (nextTest > maxTestNum) {
+          alert("すべてのテストが完了しました！");
+          showSection('setupSection');
+        } else {
+          document.getElementById('testNumber').value = nextTest;
+          loadWords();
+        }
         return;
       }
       currentWords = [...missed];
